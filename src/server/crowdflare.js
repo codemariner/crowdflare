@@ -10,16 +10,9 @@
 
 var express = require("express");
 var app = express();
-var clients = {};
+var index = 0;
+var goingToStart = false;
  
-var wave = require(__dirname + '/../../patterns/wave.json');
-
-var patterns = {
-    wave: wave
-};
-
-
-
 app.configure(function() {
     console.log(process.env.PORT);
     app.set('port', process.env.PORT || 3000);
@@ -34,33 +27,26 @@ app.listen(app.get('port'), function() {
   console.log("Express server listening on port " + app.get('port'));
 });
 
-
 var io = require('socket.io').listen(3001);
 io.sockets.on('connection', function (socket) {
     socket.emit('connect', { connected: true });
+
     socket.on('register', function (data) {
-        console.log(data);
-        clients[data.position] = socket;
+        console.log("Setting " + socket.id + " to " + index);
 
-        var message = {};
-        message.registered = true;
-        message.message = "Registered at position " + data.position;
+        var message = {
+            registered: true,
+            index: index
+        };
+        index++;
 
-        io.sockets.emit('registered', message);
-    });
-    socket.on('load', function (data) {
-        var pattern = patterns[data.pattern];
-        for (var x=0;x<pattern.length;x++) {
-            var row = pattern[x];
-            for (var y=0;y<row.length;y++) {
-                var clientIdx = x + "" + y + "";
-                // need to figure out which socket we have
-                socket.emit('load', {pattern: data.pattern, data: row[y]});
-            }
+        socket.emit('registered', message);
+
+        if (!goingToStart) {
+            goingToStart = true;
+            setTimeout(function() {
+                io.sockets.emit('start');
+            }, 5000)
         }
     });
 });
-
-
-
-
