@@ -73,6 +73,20 @@ io.sockets.on('connection', function (socket) {
                 }
             }
         }
+        if (pattern === 'random') {
+            for (var x=0;x<grid.x.length;x++) {
+                var column = grid.x[x];
+                var width = grid.x.length;
+                for (var n=0;n<column.length;n++) {
+                    var timeline = [];
+                    for (var i=0;i<50;i++) {
+                        timeline.push(parseInt((Math.random() * 5)+1) % 2);
+                    }
+                    var client = io.sockets.socket(column[n]);
+                    client.emit('load', {timeline: timeline, pattern: pattern});
+                }
+            }
+        }
     });
 });
 
