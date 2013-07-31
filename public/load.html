@@ -1,0 +1,56 @@
+<html>
+<head>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="/jquery-2.0.3.min.js"></script>
+    <style>
+        body {background-color: #000; color: #ddd;}
+    </style>
+</head>
+<body>
+    <div id="connection"></div>
+    <div id="registration"></div>
+    <div id="loaded"></div>
+
+    <div>
+        position: <input type="text" id="position"/>
+        <button type="button" id="register" value="register">register</button>
+        <br/>
+        <button type="button" class="pattern" id="pattern" value="wave">load wave</button>
+    </div>
+
+    <script>
+        var socket = io.connect('http://localhost:3001');
+        var pattern = [];
+        socket.on('connect', function (data) {
+            if (data.connected) {
+                $('#connection').html('your connected');
+            }
+        });
+        socket.on('registered', function(data) {
+            console.log(data);
+            if (data.registered) {
+                $('#registration').html(data.message);
+                $('#register').unbind('click');
+            }
+        });
+        socket.on('load', function(data) {
+            pattern = data.pattern;
+            console.log(data);
+            $('#loaded').html('loaded: ' + data.pattern);
+        });
+
+        CF = {
+            register: function() {
+                socket.emit('register', {position: $('#position').val()});
+            },
+            load: function() {
+                console.log($(this).val());
+                socket.emit('load', {pattern: $(this).val()});
+            }
+        };
+        $('#register').on('click', CF.register);
+        $('.pattern').on('click', CF.load);
+    </script>
+
+</body>
+</html>
