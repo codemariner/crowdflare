@@ -4,6 +4,15 @@
     <script src="/jquery-2.0.3.min.js"></script>
     <style>
         body {background-color: #000; color: #ddd;}
+        iframe {
+            position:absolute;
+            margin:0;
+            padding:0;
+            width:50px;
+            height:50px;
+            overflow:hidden;
+            border: 1px solid #333;
+        }
     </style>
 </head>
 <body>
@@ -11,10 +20,10 @@
     <button id="close" >close</button>
     <script>
         CF = {
-            maxX: 10,
-            maxY: 5,
-            width: 120,
-            height: 100,
+            maxX: 15,
+            maxY: 8,
+            width: 50,
+            height: 50,
             windows: [],
             open: function() {
                 console.log('opening');
@@ -31,17 +40,15 @@
             _openWin: function(x,y) {
                 var name = "win"+x+''+y;
                 console.log(name);
-                var win =  window.open('/load.html?x='+x+'&y='+y, name,
-                    "directories=no,location=no,toolbar=no,titlebar=no,scrollbars=no,resizable=no,menubar=no,fullscreen=no,height="+CF.height+",width="+
-                    CF.width+",top="
-                    + (y * (CF.height + 60))
-                    + ",left="+ (x * (CF.width + 10 ))
-                    );
-                CF.windows.push(win);
+                var iframe = $('<iframe src="/load.html?x='+x+'&y='+y+'" style="top:'+
+                    (y * (CF.height + 10) + 50) +';left:'+
+                    (x * (CF.width + 10) + 20)+';" scrolling="no" />');
+                CF.windows.push(iframe);
+                $('body').append(iframe);
             },
             closeWindows: function() {
                 $.each(CF.windows, function() {
-                    this.close();
+                    $(this).remove();
                 });
             }
         }
