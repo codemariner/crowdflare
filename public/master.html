@@ -18,7 +18,16 @@
 <body>
     <button id="openGrid" value="grid">open grid</button>
     <button id="close" >close</button>
+    <button class="pattern" value="wave">wave</button>
+    <span id="connection"></span>
     <script>
+        var socket = io.connect('http://localhost:3001');
+        socket.on('connect', function (data) {
+            if (data.connected) {
+                $('#connection').html("OK");
+            }
+        });
+
         CF = {
             maxX: 15,
             maxY: 8,
@@ -40,7 +49,7 @@
             _openWin: function(x,y) {
                 var name = "win"+x+''+y;
                 console.log(name);
-                var iframe = $('<iframe src="/load.html?x='+x+'&y='+y+'" style="top:'+
+                var iframe = $('<iframe src="/node.html?x='+x+'&y='+y+'" style="top:'+
                     (y * (CF.height + 10) + 50) +';left:'+
                     (x * (CF.width + 10) + 20)+';" scrolling="no" />');
                 CF.windows.push(iframe);
@@ -50,11 +59,16 @@
                 $.each(CF.windows, function() {
                     $(this).remove();
                 });
+            },
+            doPattern: function() {
+                socket.emit("load", {pattern: $(this).val()});
             }
         }
 
         $('#openGrid').on('click', CF.open);
         $('#close').on('click', CF.closeWindows);
+        $('.pattern').on('click', CF.doWave);
+
     </script>
 </body>
 </html>

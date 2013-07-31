@@ -10,7 +10,7 @@
 
 var express = require("express");
 var app = express();
-var clients = {};
+var grid = [];
  
 var wave = require(__dirname + '/../../patterns/wave.json');
 
@@ -40,24 +40,17 @@ io.sockets.on('connection', function (socket) {
     socket.emit('connect', { connected: true });
     socket.on('register', function (data) {
         console.log(data);
-        clients[data.position] = socket;
-
-        var message = {};
-        message.registered = true;
-        message.message = "Registered at position " + data.position;
-
-        io.sockets.emit('registered', message);
-    });
-    socket.on('load', function (data) {
-        var pattern = patterns[data.pattern];
-        for (var x=0;x<pattern.length;x++) {
-            var row = pattern[x];
-            for (var y=0;y<row.length;y++) {
-                var clientIdx = x + "" + y + "";
-                // need to figure out which socket we have
-                socket.emit('load', {pattern: data.pattern, data: row[y]});
-            }
+        var row = grid[data.x] 
+        if (typeof row === 'undefined') {
+            row = grid[data.x] = [];
         }
+        var column = row[data.y];
+        if (typeof column === 'undefined') {
+            column = row[data.y] = [];
+        }
+        column[data.y] = socket;
+
+        socket.emit('registered', {message: 'registered: ' + data.x + ',' + data.y});
     });
 });
 

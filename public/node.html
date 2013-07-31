@@ -1,0 +1,50 @@
+<html>
+<head>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="/jquery-2.0.3.min.js"></script>
+    <style>
+        body {background-color: #000; color: #333;}
+        #connection {text-align:center;}
+    </style>
+</head>
+<body>
+    <div id="connection">
+    </div>
+
+    <script>
+        var socket = io.connect('http://localhost:3001');
+        var pattern = [];
+        socket.on('connect', function (data) {
+            if (data.connected) {
+                console.log('connected');
+                $('#connection').html("OK");
+            }
+            CF.register();
+        });
+        socket.on('registered', function(data) {
+            console.log(data.message);
+        });
+
+        CF = {
+            register: function() {
+                
+                var queries = {};
+                $.each(document.location.search.substr(1).split('&'),function(c,q){
+                    var i = q.split('=');
+                    queries[i[0].toString()] = i[1].toString();
+                });
+                var x = parseInt(queries['x']);
+                var y = parseInt(queries['y']);
+                console.log('emit register ' + x + "," + y); 
+                socket.emit('register', {x: x, y: y});
+            },
+            load: function() {
+                console.log($(this).val());
+                socket.emit('load', {pattern: $(this).val()});
+            }
+        };
+
+    </script>
+
+</body>
+</html>
