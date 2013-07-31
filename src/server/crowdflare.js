@@ -10,7 +10,7 @@
 
 var express = require("express");
 var app = express();
-var index = 0;
+var offset = 0;
 var goingToStart = false;
  
 app.configure(function() {
@@ -32,13 +32,13 @@ io.sockets.on('connection', function (socket) {
     socket.emit('connect', { connected: true });
 
     socket.on('register', function (data) {
-        console.log("Setting " + socket.id + " to " + index);
+        console.log("Setting " + socket.id + " to " + offset);
 
         var message = {
             registered: true,
-            index: index
+            offset: offset
         };
-        index++;
+        offset = (offset + 1) % 10;
 
         socket.emit('registered', message);
 

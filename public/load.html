@@ -22,7 +22,7 @@
     <script>
         var socket = io.connect('http://localhost:3001');
         var instructions = [1, 0, 0, 0, 0, 0, 0, 0, 0, 0];
-        var index = 0;
+        var offset = 0;
         socket.on('connect', function (data) {
             if (this.socket.connected) {
                 $('#connection').html('you\'re connected');
@@ -31,13 +31,14 @@
         socket.on('registered', function(data) {
             if (data.registered) {
                 $('#register-block').hide();
-                $('#registration').text('Registered as ' + data.index);
-                index = data.index;
+                $('#registration').text('Registered as ' + data.offset);
+                offset = data.offset;
             }
         });
         socket.on('start', function(data) {
+            var i = offset;
             setInterval(function() {
-                var instruction = instructions[index % instructions.length];
+                var instruction = instructions[i];
                 if (instruction == 1) {
                     $('body').css({
                         backgroundColor: '#fff'
@@ -47,7 +48,7 @@
                         backgroundColor: '#000'
                     });
                 }
-                index++;
+                i = (i + 1) % instructions.length;
             }, 200)
         });
 
