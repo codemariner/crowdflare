@@ -1,0 +1,53 @@
+<html>
+<head>
+    <script src="http://localhost:3001/socket.io/socket.io.js"></script>
+    <script src="/jquery-2.0.3.min.js"></script>
+    <style>
+        body {background-color: #000; color: #ddd;}
+    </style>
+</head>
+<body>
+    <button id="openGrid" value="grid">open grid</button>
+    <button id="close" >close</button>
+    <script>
+        CF = {
+            maxX: 10,
+            maxY: 5,
+            width: 120,
+            height: 100,
+            windows: [],
+            open: function() {
+                console.log('opening');
+                var val = $(this).val();
+                if (val === 'grid') {
+                    for (var x=0;x<CF.maxX;x++) {
+                        for (var y=0;y<CF.maxY;y++) {
+                            console.log('open '+ x + ',' + y);
+                            CF._openWin(x,y);
+                        }
+                    }
+                }
+            },
+            _openWin: function(x,y) {
+                var name = "win"+x+''+y;
+                console.log(name);
+                var win =  window.open('/load.html?x='+x+'&y='+y, name,
+                    "directories=no,location=no,toolbar=no,titlebar=no,scrollbars=no,resizable=no,menubar=no,fullscreen=no,height="+CF.height+",width="+
+                    CF.width+",top="
+                    + (y * (CF.height + 60))
+                    + ",left="+ (x * (CF.width + 10 ))
+                    );
+                CF.windows.push(win);
+            },
+            closeWindows: function() {
+                $.each(CF.windows, function() {
+                    this.close();
+                });
+            }
+        }
+
+        $('#openGrid').on('click', CF.open);
+        $('#close').on('click', CF.closeWindows);
+    </script>
+</body>
+</html>
