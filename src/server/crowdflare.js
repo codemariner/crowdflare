@@ -10,15 +10,8 @@
 
 var express = require("express");
 var app = express();
-var grid = [];
+var grid = {x: [], y: []};
  
-var wave = require(__dirname + '/../../patterns/wave.json');
-
-var patterns = {
-    wave: wave
-};
-
-
 
 app.configure(function() {
     console.log(process.env.PORT);
@@ -39,21 +32,47 @@ var io = require('socket.io').listen(3001);
 io.sockets.on('connection', function (socket) {
     socket.emit('connect', { connected: true });
     socket.on('register', function (data) {
-        console.log(data);
-        var row = grid[data.x] 
+        var row = grid.x[data.x];
         if (typeof row === 'undefined') {
-            row = grid[data.x] = [];
+            row = [];
+            grid.x[data.x] = row;
         }
-        var column = row[data.y];
-        if (typeof column === 'undefined') {
-            column = row[data.y] = [];
-        }
-        column[data.y] = socket;
+        row[data.y] = socket.id;
 
+        var column = grid.y[data.y];
+        if (typeof column === 'undefined') {
+            column = [];
+            grid.y[data.y] = column;
+        }
+        column[data.x] = socket.id;
         socket.emit('registered', {message: 'registered: ' + data.x + ',' + data.y});
     });
+    socket.on('start', function (data) {
+        io.sockets.emit("start");
+    });
+    socket.on('stop', function (data) {
+        io.sockets.emit("stop");
+    });
+    socket.on('loadPattern', function (data) {
+        var pattern = data.pattern;
+        if (pattern === 'wave') {
+            for (var x=0;x<grid.x.length;x++) {
+                var column = grid.x[x];
+                var width = grid.x.length;
+                var timeline = [];
+                for (var i=0;i<width;i++) {
+                    if (i === x) {
+                        timeline.push(1);
+                    } else {
+                        timeline.push(0);
+                    }
+                }
+                for (var n=0;n<column.length;n++) {
+                    var client = io.sockets.socket(column[n]);
+                    client.emit('load', {timeline: timeline, pattern: pattern});
+                }
+            }
+        }
+    });
 });
-
-
-
 

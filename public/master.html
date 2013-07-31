@@ -20,6 +20,8 @@
     <button id="close" >close</button>
     <button class="pattern" value="wave">wave</button>
     <span id="connection"></span>
+    <button id="start">start</button>
+    <button id="stop">stop</button>
     <script>
         var socket = io.connect('http://localhost:3001');
         socket.on('connect', function (data) {
@@ -60,14 +62,23 @@
                     $(this).remove();
                 });
             },
-            doPattern: function() {
-                socket.emit("load", {pattern: $(this).val()});
+            loadPattern: function() {
+                console.log('click');
+                socket.emit("loadPattern", {pattern: $(this).attr('value')});
+            },
+            start: function() {
+                socket.emit("start");
+            },
+            stop: function() {
+                socket.emit("stop");
             }
         }
 
         $('#openGrid').on('click', CF.open);
         $('#close').on('click', CF.closeWindows);
-        $('.pattern').on('click', CF.doWave);
+        $('.pattern').on('click', CF.loadPattern);
+        $('#start').on('click', CF.start);
+        $('#stop').on('click', CF.stop);
 
     </script>
 </body>

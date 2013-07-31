@@ -2,6 +2,7 @@
 <head>
     <script src="http://localhost:3001/socket.io/socket.io.js"></script>
     <script src="/jquery-2.0.3.min.js"></script>
+    <script src="/jquery-ui-1.10.3.custom.min.js"></script>
     <style>
         body {background-color: #000; color: #333;}
         #connection {text-align:center;}
@@ -24,8 +25,23 @@
         socket.on('registered', function(data) {
             console.log(data.message);
         });
+        socket.on('load', function(data) {
+            console.log('loading timeline');
+            console.log(data.timeline);
+            CF.timeline = data.timeline;
+            $('#connection').html(data.pattern);
+        });
+        socket.on('start', function(data) {
+            CF.start();
+        });
+        socket.on('stop', function(data) {
+            CF.stop();
+        });
 
+        var index = 0;
+        var interval = null;
         CF = {
+            timeline: [],
             register: function() {
                 
                 var queries = {};
@@ -35,12 +51,31 @@
                 });
                 var x = parseInt(queries['x']);
                 var y = parseInt(queries['y']);
-                console.log('emit register ' + x + "," + y); 
+                console.log('emit register' + x + "," + y); 
                 socket.emit('register', {x: x, y: y});
             },
             load: function() {
                 console.log($(this).val());
                 socket.emit('load', {pattern: $(this).val()});
+            },
+            start: function() {
+                index = 0;
+                interval = setInterval(function() {
+                    if (CF.timeline[index] === 1) {
+                        $('body').effect("highlight");
+                    }
+                    index = index + 1;
+                    if (index >= CF.timeline.length) {
+                        index = 0;
+                    }
+                }, 500);
+            },
+            stop: function() {
+                if (interval) {
+                    clearInterval(interval);
+                    index = 0;
+                    interval = null;
+                }
             }
         };
 
